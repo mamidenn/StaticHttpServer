@@ -69,8 +69,7 @@ namespace StaticHttpServer
                     request.Method,
                     request.Path,
                     request.Version);
-                var file = new Uri(Path.Combine(_documentRoot.AbsolutePath,
-                    request.Path.TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)));
+                var file = new Uri(_documentRoot, request.Path.TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
                 if (!_documentRoot.IsBaseOf(file))
                 {
                     Send(handler, "HTTP/1.0 403 Forbidden");
@@ -79,7 +78,7 @@ namespace StaticHttpServer
                 {
                     if (string.IsNullOrEmpty(Path.GetFileName(file.AbsolutePath)))
                     {
-                        file = new Uri(Path.Combine(file.AbsolutePath, DefaultPage));
+                        file = new Uri(file, DefaultPage);
                     }
                     SendFile(handler, file.AbsolutePath);
                 }
