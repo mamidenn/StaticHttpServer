@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -22,23 +21,19 @@ namespace StaticHttpServer
     {
         private const string DefaultPage = "index.html";
         private readonly Socket _listener = new Socket(SocketType.Stream, ProtocolType.Tcp);
-        private readonly string _hostIp;
-        private readonly int _port;
         private readonly Uri _documentRoot;
         private static readonly ManualResetEvent Semaphore = new ManualResetEvent(true);
 
         public HttpServer(string hostIp, int port, string documentRoot, int maxNumConnections = 10)
         {
-            _port = port;
             _documentRoot = new Uri(documentRoot);
-            _hostIp = hostIp;
-            _listener.Bind(new IPEndPoint(IPAddress.Parse(_hostIp), port));
+            _listener.Bind(new IPEndPoint(IPAddress.Parse(hostIp), port));
             _listener.Listen(maxNumConnections);
         }
 
         public void Start()
         {
-            Console.WriteLine("Waiting for Connections at {0}:{1}", _hostIp, _port);
+            Console.WriteLine("Waiting for Connections at {0}", _listener.LocalEndPoint);
             while (true)
             {
                 Semaphore.Reset();
@@ -103,6 +98,7 @@ namespace StaticHttpServer
             handler.EndSend(ar);
             handler.Shutdown(SocketShutdown.Both);
             handler.Close();
+            handler.Dispose();
         }
 
         private static void SendFile(Socket handler, string absolutePath)
